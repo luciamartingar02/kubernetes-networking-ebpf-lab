@@ -1,0 +1,30 @@
+# Vagrant
+.vagrant/
+
+# Logs
+*.log
+
+# Editor
+.vscode/
+.idea/
+
+# Linux
+*.swp
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Kubernetes
+kubeconfig
+*.kubeconfig
+
+# Ansible
+*.retry
+
+# Terraform (por si en el futuro lo usas)
+.terraform/
+*.tfstate
+*.tfstate.*
