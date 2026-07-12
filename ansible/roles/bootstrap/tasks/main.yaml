@@ -1,0 +1,104 @@
+---
+###############################################################################
+# Bootstrap role
+#
+# Este rol prepara cualquier servidor Rocky Linux para ejecutar Kubernetes.
+#
+# NO instala Kubernetes.
+#
+# Su única misión es preparar el sistema operativo.
+###############################################################################
+
+###############################################################################
+# Actualizar la información de los repositorios
+###############################################################################
+
+- name: Actualizar cache de paquetes
+  dnf:
+    update_cache: true
+
+###############################################################################
+# Instalar herramientas básicas
+###############################################################################
+
+- name: Instalar paquetes básicos
+  dnf:
+    name:
+      - git
+      - curl
+      - wget
+      - vim
+      - jq
+      - tar
+      - unzip
+      - net-tools
+      - iproute
+      - bind-utils
+      - tcpdump
+      - bash-completion
+    state: present
+
+###############################################################################
+# Desactivar Firewalld
+###############################################################################
+
+- name: Detener Firewalld
+  service:
+    name: firewalld
+    state: stopped
+    enabled: false
+  ignore_errors: true
+
+###############################################################################
+# Desactivar Swap
+###############################################################################
+
+- name: Desactivar swap en ejecución
+  command: swapoff -a
+  when: ansible_swaptotal_mb > 0
+
+- name: Eliminar swap de fstab
+  replace:
+    path: /etc/fstab
+    regexp: '^(.*swap.*)$'
+    replace: '# \1'
+
+###############################################################################
+# Cargar módulos necesarios
+###############################################################################
+
+- name: Cargar módulo overlay
+  command: modprobe overlay
+
+- name: Cargar módulo br_netfilter
+  command: modprobe br_netfilter
+
+###############################################################################
+# Hacer permanentes los módulos
+###############################################################################
+
+- name: Configurar módulos persistentes
+  copy:
+    dest: /etc/modules-load.d/rke2.conf
+    content: |
+      overlay
+      br_netfilter
+
+###############################################################################
+# Configurar parámetros sysctl
+###############################################################################
+
+- name: Configurar sysctl para Kubernetes
+  copy:
+    dest: /etc/sysctl.d/90-kubernetes.conf
+    content: |
+      net.bridge.bridge-nf-call-iptables = 1
+      net.bridge.bridge-nf-call-ip6tables = 1
+      net.ipv4.ip_forward = 1
+
+###############################################################################
+# Aplicar configuración sysctl
+###############################################################################
+
+- name: Aplicar parámetros sysctl
+  command: sysctl --system
