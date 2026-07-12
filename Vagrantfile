@@ -9,8 +9,8 @@
 Vagrant.configure("2") do |config|
 
   # Base box
-  config.vm.box = "bento/rockylinux-9"
-  config.vm.box_version = "202304.25.0"
+  config.vm.box = "boxen/rockylinux-9"
+  config.vm.box_version = "2025.08.20.12"
   
   config.vm.synced_folder ".", "/vagrant", disabled: true
 
