@@ -1,0 +1,8 @@
+---
+- name: Install RKE2 Server
+  hosts: servers
+  become: true
+
+  roles:
+    - rke2-common
+    - rke2-server

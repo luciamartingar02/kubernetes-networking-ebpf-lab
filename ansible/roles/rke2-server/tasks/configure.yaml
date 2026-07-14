@@ -1,0 +1,20 @@
+---
+###############################################################################
+# Configure RKE2
+###############################################################################
+
+- name: Create RKE2 configuration directory
+  file:
+    path: /etc/rancher/rke2
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy RKE2 configuration
+  template:
+    src: config.yaml.j2
+    dest: /etc/rancher/rke2/config.yaml
+    owner: root
+    group: root
+    mode: "0644"

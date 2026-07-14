@@ -1,0 +1,15 @@
+---
+###############################################################################
+# RKE2 Server
+#
+# Instala y configura el primer nodo control-plane siguiendo la documentación
+# oficial de Rancher.
+###############################################################################
+
+- import_tasks: install.yaml
+
+- import_tasks: configure.yaml
+
+- import_tasks: service.yaml
+
+- import_tasks: kubeconfig.yaml

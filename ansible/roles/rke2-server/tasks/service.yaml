@@ -1,0 +1,21 @@
+---
+###############################################################################
+# Enable and Start RKE2
+###############################################################################
+
+- name: Enable rke2-server service
+  systemd:
+    name: rke2-server
+    enabled: true
+
+- name: Start rke2-server service
+  systemd:
+    name: rke2-server
+    state: started
+
+- name: Show next verification steps
+  debug:
+    msg:
+      - "RKE2 Server installation started successfully."
+      - "Verify the service status with:"
+      - "  sudo systemctl status rke2-server"
