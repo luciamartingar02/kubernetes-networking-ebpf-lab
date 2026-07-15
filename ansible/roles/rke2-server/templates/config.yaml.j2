@@ -1,7 +1,10 @@
 write-kubeconfig-mode: "{{ write_kubeconfig_mode }}"
+
 cluster-cidr: "{{ cluster_cidr }}"
 service-cidr: "{{ service_cidr }}"
 cluster-dns: "{{ cluster_dns }}"
 
 cni:
   - none
+
+disable-kube-proxy: true
