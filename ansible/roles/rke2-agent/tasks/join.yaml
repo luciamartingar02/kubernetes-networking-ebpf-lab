@@ -1,0 +1,15 @@
+---
+###############################################################################
+# Read cluster token
+###############################################################################
+
+- name: Read RKE2 node token from server
+  slurp:
+    src: /var/lib/rancher/rke2/server/node-token
+  delegate_to: master
+  run_once: true
+  register: rke2_token
+
+- name: Store decoded token
+  set_fact:
+    cluster_token: "{{ rke2_token.content | b64decode | trim }}"

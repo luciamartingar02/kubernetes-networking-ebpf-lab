@@ -1,0 +1,8 @@
+---
+- name: Install RKE2 Agent
+  hosts: agents
+  become: true
+
+  roles:
+    - rke2-common
+    - rke2-agent

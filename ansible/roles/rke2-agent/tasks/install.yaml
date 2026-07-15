@@ -1,0 +1,13 @@
+---
+###############################################################################
+# Install RKE2 Agent
+###############################################################################
+
+- name: Install RKE2 Agent
+  shell: curl -sfL https://get.rke2.io | sh -
+  environment:
+    INSTALL_RKE2_CHANNEL: "{{ rke2_channel }}"
+    INSTALL_RKE2_VERSION: "{{ rke2_version }}"
+    INSTALL_RKE2_TYPE: agent
+  args:
+    creates: /usr/local/bin/rke2

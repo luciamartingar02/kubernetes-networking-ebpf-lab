@@ -1,0 +1,15 @@
+---
+###############################################################################
+# RKE2 Agent
+
+# Instala y configura el nodo agente siguiendo la documentación
+# oficial de Rancher.
+###############################################################################
+
+- import_tasks: install.yaml
+
+- import_tasks: join.yaml
+
+- import_tasks: configure.yaml
+
+- import_tasks: service.yaml

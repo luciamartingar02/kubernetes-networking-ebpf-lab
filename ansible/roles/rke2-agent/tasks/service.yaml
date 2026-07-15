@@ -1,0 +1,14 @@
+---
+###############################################################################
+# Enable and Start RKE2
+###############################################################################
+
+- name: Enable rke2-agent
+  systemd:
+    name: rke2-agent
+    enabled: true
+
+- name: Start rke2-agent
+  systemd:
+    name: rke2-agent
+    state: started
