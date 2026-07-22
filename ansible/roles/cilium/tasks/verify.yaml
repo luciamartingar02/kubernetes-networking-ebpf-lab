@@ -1,0 +1,38 @@
+---
+- name: Wait until Cilium DaemonSet is Ready
+  command: >
+    /var/lib/rancher/rke2/bin/kubectl rollout status
+    daemonset/cilium
+    -n kube-system
+  environment:
+    KUBECONFIG: /etc/rancher/rke2/rke2.yaml
+  register: rollout
+  retries: 30
+  delay: 10
+  until: rollout.rc == 0
+  changed_when: false
+
+- name: Wait until all nodes are Ready
+  command: >
+    /var/lib/rancher/rke2/bin/kubectl get nodes
+  environment:
+    KUBECONFIG: /etc/rancher/rke2/rke2.yaml
+  register: nodes
+  retries: 30
+  delay: 10
+  until: "'NotReady' not in nodes.stdout"
+  changed_when: false
+
+- name: Show cluster nodes
+  command: >
+    /var/lib/rancher/rke2/bin/kubectl get nodes -o wide
+  environment:
+    KUBECONFIG: /etc/rancher/rke2/rke2.yaml
+  changed_when: false
+
+- name: Show Cilium pods
+  command: >
+    /var/lib/rancher/rke2/bin/kubectl get pods -n kube-system
+  environment:
+    KUBECONFIG: /etc/rancher/rke2/rke2.yaml
+  changed_when: false

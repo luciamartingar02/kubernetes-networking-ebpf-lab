@@ -1,0 +1,7 @@
+---
+- name: Install Cilium
+  hosts: servers
+  become: true
+
+  roles:
+    - cilium

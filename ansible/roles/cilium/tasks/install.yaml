@@ -1,0 +1,47 @@
+---
+###############################################################################
+# Copy Helm values
+###############################################################################
+
+- name: Copy Cilium values
+  template:
+    src: values.yaml.j2
+    dest: /tmp/cilium-values.yaml
+    mode: "0644"
+
+###############################################################################
+# Add Helm repository
+###############################################################################
+
+- name: Add Cilium Helm repository
+  command: >
+    /usr/local/bin/helm repo add cilium https://helm.cilium.io
+  environment:
+    KUBECONFIG: /etc/rancher/rke2/rke2.yaml
+  changed_when: false
+
+###############################################################################
+# Update repositories
+###############################################################################
+
+- name: Update Helm repositories
+  command: /usr/local/bin/helm repo update
+  environment:
+    KUBECONFIG: /etc/rancher/rke2/rke2.yaml
+  changed_when: false
+
+###############################################################################
+# Install Cilium
+###############################################################################
+
+- name: Install Cilium
+  command: >
+    /usr/local/bin/helm upgrade
+    --install cilium
+    cilium/cilium
+    --namespace kube-system
+    --create-namespace
+    --version {{ cilium_version }}
+    --values /tmp/cilium-values.yaml
+  environment:
+    KUBECONFIG: /etc/rancher/rke2/rke2.yaml

@@ -1,0 +1,39 @@
+---
+###############################################################################
+# Download Helm installer
+###############################################################################
+
+- name: Download Helm installer
+  shell: |
+    rm -f /tmp/get_helm.sh
+    curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 \
+      -o /tmp/get_helm.sh
+  changed_when: true
+
+###############################################################################
+# Make installer executable
+###############################################################################
+
+- name: Make Helm installer executable
+  file:
+    path: /tmp/get_helm.sh
+    mode: "0755"
+
+###############################################################################
+# Install Helm
+###############################################################################
+
+- name: Install Helm
+  shell: /tmp/get_helm.sh
+  args:
+    creates: /usr/local/bin/helm
+  environment:
+    PATH: "/usr/local/bin:/usr/bin:/bin"
+
+###############################################################################
+# Verify Helm
+###############################################################################
+
+- name: Verify Helm installation
+  command: /usr/local/bin/helm version --short
+  changed_when: false
