@@ -25,7 +25,7 @@ k8s_service_port: 6443
 
 cilium_kube_proxy_replacement: true
 
-cilium_hubble_enabled: false
+cilium_hubble_enabled: true
 
 cilium_prometheus_enabled: false
 
