@@ -1,0 +1,77 @@
+---
+###############################################################################
+# Detect architecture
+###############################################################################
+
+- name: Set Cilium CLI architecture
+  set_fact:
+    cilium_cli_arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else ansible_architecture }}"
+
+###############################################################################
+# Get latest stable version
+###############################################################################
+
+- name: Get latest Cilium CLI version
+  shell: |
+    curl -fsSL https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt
+  register: cilium_cli_version
+  changed_when: false
+
+###############################################################################
+# Remove previous downloads
+###############################################################################
+
+- name: Remove previous downloaded files
+  file:
+    path: "/tmp/{{ item }}"
+    state: absent
+  loop:
+    - "cilium-linux-{{ cilium_cli_arch }}.tar.gz"
+    - "cilium-linux-{{ cilium_cli_arch }}.tar.gz.sha256sum"
+
+###############################################################################
+# Download CLI
+###############################################################################
+
+- name: Download Cilium CLI archive
+  shell: |
+    curl -L --fail --output /tmp/cilium-linux-{{ cilium_cli_arch }}.tar.gz \
+    https://github.com/cilium/cilium-cli/releases/download/{{ cilium_cli_version.stdout }}/cilium-linux-{{ cilium_cli_arch }}.tar.gz
+
+
+###############################################################################
+# Download checksum
+###############################################################################
+
+- name: Download checksum
+  shell: |
+    curl -L --fail --output /tmp/cilium-linux-{{ cilium_cli_arch }}.tar.gz.sha256sum \
+    https://github.com/cilium/cilium-cli/releases/download/{{ cilium_cli_version.stdout }}/cilium-linux-{{ cilium_cli_arch }}.tar.gz.sha256sum
+
+###############################################################################
+# Verify checksum
+###############################################################################
+
+- name: Verify checksum
+  shell: |
+    cd /tmp
+    sha256sum --check cilium-linux-{{ cilium_cli_arch }}.tar.gz.sha256sum
+  changed_when: false
+
+###############################################################################
+# Install CLI
+###############################################################################
+
+- name: Install Cilium CLI
+  shell: |
+    tar -C /usr/local/bin -xzf /tmp/cilium-linux-{{ cilium_cli_arch }}.tar.gz cilium
+  args:
+    creates: /usr/local/bin/cilium
+
+###############################################################################
+# Verify installation
+###############################################################################
+
+- name: Verify Cilium CLI
+  command: /usr/local/bin/cilium version
+  changed_when: false

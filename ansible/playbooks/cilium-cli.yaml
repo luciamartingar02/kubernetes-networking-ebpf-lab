@@ -1,0 +1,7 @@
+---
+- name: Install and Validate Cilium CLI
+  hosts: servers
+  become: true
+
+  roles:
+    - cilium-cli
