@@ -1,0 +1,11 @@
+---
+###############################################################################
+# Local Path Provisioner
+###############################################################################
+
+local_path_provisioner_version: "v0.0.32"
+
+local_path_manifest: /tmp/local-path-storage.yaml
+
+kubectl_bin: /var/lib/rancher/rke2/bin/kubectl
+kubeconfig: /etc/rancher/rke2/rke2.yaml

@@ -1,0 +1,7 @@
+---
+- name: Install Local Path Provisioner
+  hosts: master
+  become: true
+
+  roles:
+    - local-path-provisioner

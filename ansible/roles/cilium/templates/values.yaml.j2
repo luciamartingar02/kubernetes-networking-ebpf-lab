@@ -17,6 +17,9 @@ operator:
 
   prometheus:
     enabled: {{ cilium_prometheus_enabled | lower }}
+    serviceMonitor:
+      enabled: true
+
 
 hubble:
   enabled: {{ cilium_hubble_enabled | lower }}
@@ -27,5 +30,19 @@ hubble:
   ui:
     enabled: false
 
+  metrics:
+    enableOpenMetrics: true
+    enabled:
+      - dns
+      - drop
+      - tcp
+      - flow
+      - icmp
+      - http
+    serviceMonitor:
+      enabled: true
+
 prometheus:
   enabled: {{ cilium_prometheus_enabled | lower }}
+  serviceMonitor:
+    enabled: true

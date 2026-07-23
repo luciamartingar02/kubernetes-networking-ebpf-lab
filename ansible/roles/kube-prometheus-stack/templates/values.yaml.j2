@@ -1,0 +1,62 @@
+grafana:
+  enabled: {{ grafana_enabled | bool | lower }}
+
+  adminPassword: admin
+
+  service:
+    type: ClusterIP
+
+  persistence:
+    enabled: true
+    storageClassName: local-path
+    size: 5Gi
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  defaultDashboardsEnabled: true
+
+alertmanager:
+  enabled: {{ alertmanager_enabled | bool | lower }}
+
+prometheus:
+  enabled: {{ prometheus_enabled | bool | lower }}
+
+  prometheusSpec:
+    retention: 10d
+
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: "1"
+        memory: 2Gi
+
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          storageClassName: local-path
+          resources:
+            requests:
+              storage: 20Gi
+
+    serviceMonitorSelectorNilUsesHelmValues: false
+
+    podMonitorSelectorNilUsesHelmValues: false
+
+    ruleSelectorNilUsesHelmValues: false
+
+    scrapeInterval: 30s
+
+    evaluationInterval: 30s
+
+defaultRules:
+  create: true

@@ -1,0 +1,7 @@
+---
+- name: Install and Validate Kube-Prometheus-Stack
+  hosts: servers
+  become: true
+
+  roles:
+    - kube-prometheus-stack

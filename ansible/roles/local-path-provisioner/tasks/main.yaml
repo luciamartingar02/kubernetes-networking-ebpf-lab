@@ -1,0 +1,84 @@
+---
+###############################################################################
+# Check if a StorageClass already exists
+###############################################################################
+
+- name: Check StorageClasses
+  command: >
+    {{ kubectl_bin }}
+    --kubeconfig {{ kubeconfig }}
+    get storageclass
+    --no-headers
+  register: storageclasses
+  changed_when: false
+  failed_when: false
+
+###############################################################################
+# Download manifest
+###############################################################################
+
+- name: Download Local Path Provisioner manifest
+  shell: |
+    curl -L \
+      https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml \
+      -o {{ local_path_manifest }}
+  args:
+    creates: "{{ local_path_manifest }}"
+  when: storageclasses.stdout == ""
+
+###############################################################################
+# Install
+###############################################################################
+
+- name: Apply Local Path Provisioner
+  command: >
+    {{ kubectl_bin }}
+    --kubeconfig {{ kubeconfig }}
+    apply -f {{ local_path_manifest }}
+  when: storageclasses.stdout == ""
+
+###############################################################################
+# Wait rollout
+###############################################################################
+
+- name: Wait until Local Path Provisioner is ready
+  command: >
+    {{ kubectl_bin }}
+    --kubeconfig {{ kubeconfig }}
+    rollout status
+    deployment/local-path-provisioner
+    -n local-path-storage
+    --timeout=180s
+  register: rollout
+  changed_when: false
+  when: storageclasses.stdout == ""
+
+###############################################################################
+# Patch StorageClass
+###############################################################################
+
+- name: Set default StorageClass
+  command: >
+    {{ kubectl_bin }}
+    --kubeconfig {{ kubeconfig }}
+    patch storageclass local-path
+    -p
+    {"metadata":{"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}
+  changed_when: false
+  failed_when: false
+  when: storageclasses.stdout == ""
+
+###############################################################################
+# Verify
+###############################################################################
+
+- name: Show StorageClasses
+  command: >
+    {{ kubectl_bin }}
+    --kubeconfig {{ kubeconfig }}
+    get storageclass
+  register: sc
+  changed_when: false
+
+- debug:
+    var: sc.stdout_lines

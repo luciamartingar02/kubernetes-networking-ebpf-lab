@@ -27,7 +27,7 @@ cilium_kube_proxy_replacement: true
 
 cilium_hubble_enabled: true
 
-cilium_prometheus_enabled: false
+cilium_prometheus_enabled: true
 
 ###############################################################################
 # Networking
