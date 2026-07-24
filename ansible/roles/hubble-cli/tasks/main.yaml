@@ -1,0 +1,124 @@
+---
+###############################################################################
+# Detect architecture
+###############################################################################
+
+- name: Set Hubble CLI architecture
+  set_fact:
+    hubble_cli_arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else ansible_architecture }}"
+
+- name: Show architecture
+  debug:
+    msg: "{{ hubble_cli_arch }}"
+
+###############################################################################
+# Get Cilium version from DaemonSet
+###############################################################################
+
+- name: Get running Cilium image
+  shell: |
+    /var/lib/rancher/rke2/bin/kubectl \
+      -n kube-system get daemonset cilium \
+      -o jsonpath='{.spec.template.spec.containers[?(@.name=="cilium-agent")].image}'
+  environment:
+    KUBECONFIG: /etc/rancher/rke2/rke2.yaml
+  register: cilium_image
+  changed_when: false
+
+- name: Extract Cilium version
+  set_fact:
+    hubble_version: >-
+      {{
+        cilium_image.stdout
+        | regex_replace('^.*cilium:v', '')
+        | regex_replace('@.*$', '')
+      }}
+
+- name: Show Hubble CLI version
+  debug:
+    msg: "v{{ hubble_version }}"
+
+###############################################################################
+# Remove previous downloads
+###############################################################################
+
+- name: Remove previous downloaded files
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/tmp/hubble-linux-{{ hubble_cli_arch }}.tar.gz"
+    - "/tmp/hubble-linux-{{ hubble_cli_arch }}.tar.gz.sha256sum"
+
+###############################################################################
+# Download CLI
+###############################################################################
+
+- name: Download Hubble CLI archive
+  shell: >
+    curl -L
+    https://github.com/cilium/hubble/releases/download/v{{ hubble_version }}/hubble-linux-{{ hubble_cli_arch }}.tar.gz
+    -o /tmp/hubble-linux-{{ hubble_cli_arch }}.tar.gz
+
+- name: Download checksum
+  shell: >
+    curl -L
+    https://github.com/cilium/hubble/releases/download/v{{ hubble_version }}/hubble-linux-{{ hubble_cli_arch }}.tar.gz.sha256sum
+    -o /tmp/hubble-linux-{{ hubble_cli_arch }}.tar.gz.sha256sum
+
+###############################################################################
+# Verify checksum
+###############################################################################
+
+- name: Verify checksum
+  shell: |
+    cd /tmp
+    sha256sum --check hubble-linux-{{ hubble_cli_arch }}.tar.gz.sha256sum
+  changed_when: false
+
+###############################################################################
+# Install CLI
+###############################################################################
+
+- name: Remove previous Hubble binary
+  file:
+    path: /usr/local/bin/hubble
+    state: absent
+
+- name: Install Hubble CLI
+  shell: |
+    tar -C /usr/local/bin \
+      -xzf /tmp/hubble-linux-{{ hubble_cli_arch }}.tar.gz \
+      hubble
+
+- name: Make Hubble executable
+  file:
+    path: /usr/local/bin/hubble
+    mode: "0755"
+
+###############################################################################
+# Verify installation
+###############################################################################
+
+- name: Verify Hubble CLI version
+  command: /usr/local/bin/hubble version
+  register: hubble_cli
+  changed_when: false
+
+- debug:
+    var: hubble_cli.stdout_lines
+
+###############################################################################
+# Verify Hubble Relay connectivity
+###############################################################################
+
+- name: Verify Hubble Relay connectivity
+  shell: |
+    /usr/local/bin/hubble status \
+      --server localhost:4245
+  register: hubble_status
+  failed_when: false
+  changed_when: false
+
+- debug:
+    var: hubble_status.stdout_lines

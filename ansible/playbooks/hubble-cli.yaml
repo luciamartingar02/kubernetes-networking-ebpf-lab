@@ -1,0 +1,7 @@
+---
+- name: Install Hubble CLI
+  hosts: master
+  become: true
+
+  roles:
+    - hubble-cli
