@@ -1,0 +1,20 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-xwing
+spec:
+  endpointSelector:
+    matchLabels:
+      org: empire
+      class: deathstar
+
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        org: alliance
+        class: xwing
+
+    toPorts:
+    - ports:
+      - port: "80"
+        protocol: TCP

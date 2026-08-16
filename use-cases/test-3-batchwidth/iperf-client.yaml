@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: iperf-client
+  namespace: bandwidth-test
+spec:
+  nodeSelector:
+    kubernetes.io/hostname: rke2-master
+  containers:
+  - name: iperf
+    image: cilium/netperf
+    command:
+      - sleep
+      - infinity
