@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: netperf-server
+  namespace: kubeproxy-test
+  labels:
+    app: netperf-server
+spec:
+  nodeSelector:
+    kubernetes.io/hostname: rke2-worker
+  containers:
+  - name: netperf
+    image: cilium/netperf
+    command:
+      - netserver
+      - -D
+    ports:
+    - containerPort: 12865
+      protocol: TCP
